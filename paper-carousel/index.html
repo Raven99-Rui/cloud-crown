@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#f1e3ce" />
+  <meta name="description" content="鎏金纸梦 · Le Carrousel d'Or——一座可以环视与乘坐的复古奢华纸艺旋转木马。" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="鎏金纸梦 · Le Carrousel d'Or" />
+  <meta property="og:description" content="奶油卡纸、酒红天鹅绒与翡翠漆面，六匹手作飞马在一座纸上剧场里缓缓苏醒。拖动环视，或登鞍随圆舞曲巡游。" />
+  <meta property="og:image" content="./preview/cover.jpg" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <title>鎏金纸梦 · Le Carrousel d'Or</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='32' fill='%236f172c'/%3E%3Ccircle cx='32' cy='32' r='25' fill='none' stroke='%23e5c184' stroke-width='2'/%3E%3Cpath d='M32 15l4 12h12l-10 7 4 13-10-7-10 7 4-13-10-7h12z' fill='%23e5c184'/%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+  <div id="app">
+    <canvas id="scene" aria-label="一座复古奢华的纸艺旋转木马，六匹飞马在鎏金穹顶下旋转"></canvas>
+    <div class="scene-wash" aria-hidden="true"></div>
+    <div class="scene-vignette" aria-hidden="true"></div>
+    <div class="paper-grain" aria-hidden="true"></div>
+    <div class="edge-frame" aria-hidden="true">
+      <span class="edge corner-tl"></span><span class="edge corner-tr"></span>
+      <span class="edge corner-bl"></span><span class="edge corner-br"></span>
+    </div>
+
+    <header class="topbar">
+      <div class="brand" aria-label="Atelier de Papier 纸艺工坊">
+        <span class="brand-mark" aria-hidden="true"><i>C</i></span>
+        <span class="brand-copy">
+          <strong>Atelier de Papier</strong>
+          <small>巴黎 · 纸艺工坊</small>
+        </span>
+      </div>
+
+      <div class="top-actions">
+        <button id="soundBtn" class="icon-button" type="button" aria-pressed="false" aria-label="打开圆舞曲声音">
+          <span class="sound-glyph" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+          <span class="button-label">声音</span>
+        </button>
+        <button id="nightBtn" class="icon-button" type="button" aria-pressed="false" aria-label="点亮夜灯">
+          <svg class="sun-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="12" cy="12" r="4.1"></circle>
+            <path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M18.7 5.3l-1.6 1.6M6.9 17.1l-1.6 1.6"></path>
+          </svg>
+          <span class="button-label">点灯</span>
+        </button>
+        <button id="fullscreenBtn" class="icon-button icon-only" type="button" aria-label="进入全屏">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M8.5 4H4v4.5M15.5 4H20v4.5M20 15.5V20h-4.5M4 15.5V20h4.5"></path>
+          </svg>
+          <span class="button-label">全屏</span>
+        </button>
+      </div>
+    </header>
+
+    <main class="hero">
+      <section class="hero-copy" aria-labelledby="title">
+        <p class="eyebrow"><span class="eyebrow-rule"></span> PAPER THEATRE <b>·</b> N° 07</p>
+        <h1 id="title"><span>Le Carrousel</span><em>d’Or</em></h1>
+        <p class="cn-title">鎏 金 纸 梦</p>
+        <p class="lede">奶油卡纸、酒红天鹅绒与翡翠色漆面，六匹手作飞马在一座纸上剧场里缓缓苏醒。坐上马背，听八音盒把旧时光重新上弦。</p>
+        <div class="hero-actions">
+          <button id="rideBtn" class="primary-button" type="button">
+            <span class="button-star" aria-hidden="true">✦</span>
+            <span class="primary-copy"><strong>登上旋转木马</strong><small>TAKE A RIDE</small></span>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 12h14M13 6.5l5.5 5.5L13 17.5"></path></svg>
+          </button>
+          <button id="detailBtn" class="text-button" type="button" aria-expanded="false" aria-controls="detailPanel">细看装置</button>
+        </div>
+        <p class="gesture-hint"><span class="hint-line"></span> 拖动环视 · 滚轮拉近 · 或点击任意一匹飞马</p>
+      </section>
+
+      <div class="edition-mark" aria-hidden="true">
+        <span>PAPIER</span><i></i><span>LAITON</span><i></i><span>SOIE</span>
+      </div>
+    </main>
+
+    <div id="horseRail" class="horse-rail" aria-label="选择一匹飞马">
+      <span class="rail-caption">CHOOSE YOUR HORSE</span>
+      <div class="rail-dots">
+        <button class="horse-dot" data-horse="0" data-label="蓝鞍飞马" style="--jewel:#477b94;--jewel-soft:#b9d3dc" type="button" aria-label="骑上蓝鞍飞马"><span></span></button>
+        <button class="horse-dot" data-horse="1" data-label="绛红衣飞马" style="--jewel:#8d2439;--jewel-soft:#d6a0a5" type="button" aria-label="骑上绛红衣飞马"><span></span></button>
+        <button class="horse-dot" data-horse="2" data-label="翡翠鞍飞马" style="--jewel:#2f6a54;--jewel-soft:#a9cbb6" type="button" aria-label="骑上翡翠鞍飞马"><span></span></button>
+        <button class="horse-dot" data-horse="3" data-label="玫瑰金飞马" style="--jewel:#b05b64;--jewel-soft:#e4b8b1" type="button" aria-label="骑上玫瑰金飞马"><span></span></button>
+        <button class="horse-dot" data-horse="4" data-label="墨棕鞍飞马" style="--jewel:#5a4435;--jewel-soft:#c5b29d" type="button" aria-label="骑上墨棕鞍飞马"><span></span></button>
+        <button class="horse-dot" data-horse="5" data-label="鎏金鞍飞马" style="--jewel:#b68b4f;--jewel-soft:#eed7a6" type="button" aria-label="骑上鎏金鞍飞马"><span></span></button>
+      </div>
+      <span id="railSelection" class="rail-selection">点击飞马，随圆舞曲启程</span>
+    </div>
+
+    <div class="footnote footnote-left" aria-hidden="true">A FICTIONAL ATELIER · PARIS 1897</div>
+    <div class="footnote footnote-right" aria-hidden="true">REAL-TIME 3D · PROCEDURAL PAPER</div>
+
+    <section id="detailPanel" class="detail-panel" aria-labelledby="detailTitle" aria-hidden="true">
+      <button id="detailClose" class="detail-close" type="button" aria-label="收起装置铭牌">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg>
+      </button>
+      <p class="detail-kicker">ATELIER ARCHIVE <span>N° 07</span></p>
+      <h2 id="detailTitle">鎏金纸梦</h2>
+      <p class="detail-lede">一座完全由纸与黄铜构成的私人游乐装置。穹顶以十六片手工条纹卡纸拼接，帷幔边缘缀着四十八盏暖灯。</p>
+      <dl class="detail-specs">
+        <div><dt>飞马</dt><dd>六匹 · 手作</dd></div>
+        <div><dt>穹顶</dt><dd>十六片 · 鎏金</dd></div>
+        <div><dt>灯球</dt><dd>四十八盏</dd></div>
+        <div><dt>转速</dt><dd>一曲一巡</dd></div>
+      </dl>
+      <div class="detail-divider"><span>✦</span></div>
+      <p class="detail-note">拖动画面环视四周，滚轮或双指拉近。点击任意一匹飞马，直接登鞍；乘坐时左右拖动，可稍稍转头看看风景。</p>
+      <button id="detailRideBtn" class="detail-action" type="button">从铭牌出发 · 登鞍</button>
+    </section>
+
+    <section id="rideHud" class="ride-hud" aria-hidden="true">
+      <div class="ride-status">
+        <span class="live-dot" aria-hidden="true"></span>
+        <span class="ride-status-copy"><small>THE GILDED WALTZ</small><strong id="rideStatusName">蓝鞍飞马 · 巡游中</strong></span>
+        <span class="ride-tempo" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+      </div>
+      <div class="ride-footer">
+        <div class="ride-caption">
+          <small>NOW ABOARD</small>
+          <strong id="rideCaptionName">蓝鞍飞马</strong>
+          <span>拖动画面 · 转头看风景</span>
+        </div>
+        <button id="endRideBtn" class="end-ride-button" type="button">
+          <span>结束体验</span>
+          <small>ESC</small>
+        </button>
+      </div>
+    </section>
+
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+    <div id="loader" class="loader" role="status" aria-live="polite">
+      <div class="loader-mark" aria-hidden="true"><span>C</span></div>
+      <p>正在展开纸上剧场</p>
+      <div class="loader-line"><i></i></div>
+      <small>PAPIER · LAITON · LUMIÈRE</small>
+    </div>
+
+    <div id="webglError" class="webgl-error" hidden>
+      <strong>这匹纸马暂时没有醒来</strong>
+      <p>请使用支持 WebGL 的现代浏览器重新打开本页。</p>
+    </div>
+  </div>
+
+  <script type="module" src="./main.js"></script>
+</body>
+</html>
