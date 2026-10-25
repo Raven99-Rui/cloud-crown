@@ -1,0 +1,11 @@
+{
+  "name": "astralia-theme-park",
+  "private": true,
+  "version": "1.0.0",
+  "description": "星梦奇境 · ASTRALIA — an explorable 3D night theme park",
+  "type": "module",
+  "scripts": {
+    "start": "node scripts/server.mjs",
+    "dev": "node scripts/server.mjs"
+  }
+}

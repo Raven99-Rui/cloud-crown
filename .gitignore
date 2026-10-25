@@ -1,0 +1,16 @@
+node_modules/
+.pnpm-store/
+.DS_Store
+Thumbs.db
+*.log
+
+# Local build tools and test output
+.tools/
+.backups/
+artifacts/
+deploy-netlify/
+github-pages/
+github-pages-full/
+astralia-netlify.zip
+_*.py
+_*.js
