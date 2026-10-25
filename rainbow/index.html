@@ -1,0 +1,304 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#123c3e" />
+  <meta name="description" content="彩虹滑道机 · THE RAINBOW CHUTE —— 一座可以亲自登顶、选道、滑行的 3D 琉璃彩虹滑道。" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23123c3e'/%3E%3Cpath d='M10 43a22 22 0 0 1 44 0' fill='none' stroke='%23f2d187' stroke-width='6'/%3E%3Cpath d='M16 43a16 16 0 0 1 5-11' fill='none' stroke='%23e2554f' stroke-width='4'/%3E%3Cpath d='M25 34a9 9 0 0 1 14 0' fill='none' stroke='%23e8b84b' stroke-width='4'/%3E%3Cpath d='M32 22l2.2 6.6L41 31l-5.6 3.7L37 42l-5-3.6-5 3.6 1.6-7.3L23 31l6.8-2.4Z' fill='%23f7e7c6'/%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="./style.css" />
+  <title>彩虹滑道机 · THE RAINBOW CHUTE</title>
+</head>
+<body>
+  <div id="app">
+    <canvas id="world" aria-label="可以互动选道、登顶与滑行的 3D 彩虹滑道机"></canvas>
+    <div class="canvas-vignette" aria-hidden="true"></div>
+    <div class="grain" aria-hidden="true"></div>
+    <div id="moodFlash" class="mood-flash" aria-hidden="true"></div>
+    <div id="rideFade" class="ride-fade" aria-hidden="true"></div>
+    <div id="speedLines" class="speed-lines" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+
+    <!-- 加载 -->
+    <section id="loading" class="loading">
+      <div class="loading-mark" aria-hidden="true">
+        <svg viewBox="0 0 120 120">
+          <path d="M14 82a46 46 0 0 1 92 0" fill="none" stroke="currentColor" stroke-width="1.1" opacity=".45"/>
+          <path d="M25 82a35 35 0 0 1 70 0" fill="none" stroke="currentColor" stroke-width="4" opacity=".9"/>
+          <path d="M34 82a26 26 0 0 1 52 0" fill="none" stroke="currentColor" stroke-width="2.2" opacity=".68"/>
+          <path d="M32 82c8-18 17-29 28-29s20 11 28 29" fill="none" stroke="currentColor" stroke-width="1.1" opacity=".35"/>
+          <path d="M60 33l4.2 12.4L76 50l-11.8 4.6L60 68l-4.2-13.4L44 50l11.8-4.6Z" fill="currentColor"/>
+          <circle cx="60" cy="96" r="2.2" fill="currentColor" opacity=".7"/>
+        </svg>
+      </div>
+      <div class="loading-title">彩虹滑道机</div>
+      <div class="loading-en">THE RAINBOW CHUTE</div>
+      <div class="loading-line"><i id="loadBar"></i></div>
+      <p id="loadText">正在给六条虹光打蜡、点亮廊灯…</p>
+    </section>
+
+    <!-- 顶部导航 -->
+    <header id="topbar" class="topbar is-hidden">
+      <div class="brand">
+        <span class="brand-seal" aria-hidden="true">
+          <svg viewBox="0 0 64 64"><path d="M8 44a24 24 0 0 1 48 0" fill="none" stroke="currentColor" stroke-width="3.4"/><path d="M16 44a16 16 0 0 1 4.6-11.2" fill="none" stroke="currentColor" stroke-width="2.3" opacity=".7"/><path d="M32 20l2.4 7.2L42 30l-6 3.9 1.7 8.1-5.7-4.1L26.3 42 28 33.9 22 30l7.6-2.8Z" fill="currentColor"/></svg>
+        </span>
+        <span class="brand-lines">
+          <strong>THE RAINBOW CHUTE</strong>
+          <small>彩虹滑道机 · 星梦奇境</small>
+        </span>
+      </div>
+
+      <div class="ride-plaque">
+        <span>ATTRACTION NO. 09</span>
+        <b>彩虹滑道机</b>
+        <i></i>
+        <em>SIX LANES OF SUMMER</em>
+      </div>
+
+      <nav class="top-actions" aria-label="场景工具">
+        <button id="soundBtn" class="icon-btn" aria-label="打开声音" data-tip="声音">
+          <svg class="ico-sound-on" viewBox="0 0 24 24"><path d="M11 5 6.5 9H3v6h3.5L11 19V5Z"/><path d="M15 8.5c1.4 1.1 1.4 5.9 0 7M18 5.5c3 2.1 3 10.9 0 13"/></svg>
+          <svg class="ico-sound-off" viewBox="0 0 24 24"><path d="M11 5 6.5 9H3v6h3.5L11 19V5Z"/><path d="m16 9 5 6m0-6-5 6"/></svg>
+        </button>
+        <button id="moodBtn" class="icon-btn" aria-label="切换天光" data-tip="切换天光">
+          <svg class="ico-day" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M19.1 4.9l-1.4 1.4M6.3 17.7l-1.4 1.4"/></svg>
+          <svg class="ico-dusk" viewBox="0 0 24 24"><path d="M4 17h16M7 17a5 5 0 0 1 10 0M12 4v3M5.6 7.6l2 2M18.4 7.6l-2 2"/><path d="M3 21h18"/></svg>
+          <svg class="ico-night" viewBox="0 0 24 24"><path d="M20.3 15.2A8.5 8.5 0 0 1 8.8 3.7 8.5 8.5 0 1 0 20.3 15.2Z"/></svg>
+        </button>
+        <button id="resetBtn" class="icon-btn" aria-label="回到最佳视角" data-tip="回到全景">
+          <svg viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 2.6-5.9"/><path d="M4 4v5h5"/></svg>
+        </button>
+        <button id="helpBtn" class="icon-btn" aria-label="游玩指引" data-tip="怎么玩">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.7 9a2.4 2.4 0 1 1 3.3 2.2c-.8.4-1 1-1 1.8M12 17h.01"/></svg>
+        </button>
+        <button id="fullBtn" class="icon-btn wide" aria-label="全屏">
+          <svg viewBox="0 0 24 24"><path d="M8 3H3v5M16 3h5v5M21 16v5h-5M3 16v5h5"/></svg>
+        </button>
+      </nav>
+    </header>
+
+    <!-- 开场 -->
+    <section id="intro" class="intro">
+      <div class="intro-frame" aria-hidden="true">
+        <div class="frame-inner"></div>
+        <span class="frame-corner tl"></span><span class="frame-corner tr"></span>
+        <span class="frame-corner bl"></span><span class="frame-corner br"></span>
+      </div>
+
+      <div class="intro-copy">
+        <div class="eyebrow"><span></span> SIX LANES OF SUMMER · EST. 2026</div>
+        <h1>
+          <span class="title-small">把一整道彩虹，铺成滑梯</span>
+          <span class="title-main">彩虹滑道机</span>
+          <span class="title-en">THE RAINBOW CHUTE</span>
+        </h1>
+        <p class="intro-desc">
+          六条琉璃滑道从鎏金穹顶倾泻而下，穿过红白条纹的洋葱顶与暖灯长廊。
+          挑一条属于你的颜色，登上十八米高的塔顶——然后在风、铃声和满场欢呼里，滑进夏天。
+        </p>
+        <div class="intro-stats">
+          <div><b>18<small>m</small></b><span>虹顶高度</span></div>
+          <i></i>
+          <div><b>06</b><span>琉璃滑道</span></div>
+          <i></i>
+          <div><b>34<small>s</small></b><span>一路滑行</span></div>
+        </div>
+        <div class="intro-actions">
+          <button id="enterBtn" class="btn btn-primary">
+            <span class="btn-copy"><small>PICK YOUR COLOUR</small><strong>选一条彩虹</strong></span>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h15M13 6l6 6-6 6"/></svg>
+          </button>
+          <button id="lookBtn" class="btn btn-text">先绕着滑道看看</button>
+        </div>
+        <div class="intro-meta">
+          <span><i class="live-dot"></i> 实时 3D</span>
+          <span>六道可选 · 可亲手加速</span>
+          <span>建议开启声音</span>
+        </div>
+      </div>
+
+      <div class="intro-side">
+        <div class="side-vertical">CHUTE · N° 09 · SUMMER</div>
+        <div class="side-medallion">
+          <svg viewBox="0 0 120 120" aria-hidden="true">
+            <circle cx="60" cy="60" r="56" fill="none" stroke="currentColor" stroke-width=".55"/>
+            <circle cx="60" cy="60" r="51" fill="none" stroke="currentColor" stroke-width=".35" stroke-dasharray="2 5"/>
+            <path d="M20 78a40 40 0 0 1 80 0" fill="none" stroke="currentColor" stroke-width="2.6" opacity=".9"/>
+            <path d="M30 78a30 30 0 0 1 60 0" fill="none" stroke="currentColor" stroke-width="1.2" opacity=".55"/>
+            <path d="M60 30l3.4 10.1L74 43l-9.4 3.7L60 57l-4.6-10.3L46 43l10.6-2.9Z" fill="currentColor"/>
+            <circle cx="60" cy="90" r="1.6" fill="currentColor"/>
+          </svg>
+          <span>虹<br/>光</span>
+        </div>
+        <div class="side-note">
+          <span>星梦奇境 · 南庭</span>
+          <b>六色玻璃钢滑道</b>
+          <i>塔顶能见度 · 整座乐园</i>
+        </div>
+      </div>
+
+      <div class="intro-ticket">
+        <div class="ticket-head"><span>ADMIT ONE</span><b>虹光滑行券</b></div>
+        <div class="ticket-rows">
+          <span><i>登顶方式</i><b>双侧鎏金阶梯</b></span>
+          <span><i>滑行速度</i><b>可亲手加速</b></span>
+          <span><i>今日虹光</i><b>六色全开</b></span>
+        </div>
+        <div class="ticket-stripes" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+      </div>
+
+      <div class="intro-foot">
+        <span>拖动环顾</span><i></i><span>点击滑道选色</span><i></i><span>按住加速</span>
+      </div>
+    </section>
+
+    <!-- 探索 / 选道 -->
+    <section id="explore" class="explore is-hidden" aria-label="选择滑道">
+      <aside class="lane-list" aria-label="六条滑道">
+        <div class="lane-list-head"><span>ALL SIX LANES</span><i></i><b>今日虹光</b></div>
+        <div id="laneRows" class="lane-rows"></div>
+        <div class="lane-list-foot">点击滑道或色点 · 选择你的颜色</div>
+      </aside>
+
+      <div class="selection">
+        <div class="selection-kicker"><span></span> CHOOSE YOUR COLOUR</div>
+        <div class="selection-main">
+          <button id="prevLane" class="mini-arrow" aria-label="上一条滑道">
+            <svg viewBox="0 0 24 24"><path d="m14 5-7 7 7 7"/></svg>
+          </button>
+          <div class="selection-name">
+            <small>第 <b id="laneNo">03</b> 道 · <span id="laneEn">GOLDEN</span></small>
+            <strong id="laneName">鎏金 · 正午阳光</strong>
+            <p id="laneNote">最亮的一条。滑道在日光下会泛出细碎金粉，适合第一次滑彩虹的人。</p>
+          </div>
+          <button id="nextLane" class="mini-arrow" aria-label="下一条滑道">
+            <svg viewBox="0 0 24 24"><path d="m10 5 7 7-7 7"/></svg>
+          </button>
+        </div>
+        <div id="laneDots" class="lane-dots" role="group" aria-label="选择滑道"></div>
+        <button id="boardBtn" class="board-btn">
+          <span class="board-ring"></span>
+          <span class="board-copy"><small>CLIMB TO LANE 03</small><strong>登上这道彩虹</strong></span>
+          <svg viewBox="0 0 24 24"><path d="M4 12h15M13 6l6 6-6 6"/></svg>
+        </button>
+      </div>
+
+      <div class="camera-hint">
+        <span class="hint-mouse"></span>
+        <div><b>拖动</b> 环顾 · <b>滚轮</b> 靠近</div>
+      </div>
+
+      <div class="floating-label">
+        <span>OPEN DAILY</span>
+        <b>09:00 — 22:30</b>
+      </div>
+
+      <div class="queue-card">
+        <span>当前排队</span>
+        <b>约 8 分钟</b>
+        <i><em></em> 虹光正好</i>
+      </div>
+    </section>
+
+    <!-- 乘坐 HUD -->
+    <section id="rideHud" class="ride-hud is-hidden" aria-label="滑行控制">
+      <div class="ride-top">
+        <div class="on-ride">
+          <i class="ride-live"></i>
+          <span id="ridePhase">登顶中</span>
+          <b id="rideLaneLabel">03 道 · 鎏金</b>
+        </div>
+        <button id="exitRide" class="exit-ride">
+          <span>结束</span>
+          <svg viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></svg>
+        </button>
+      </div>
+
+      <div id="countdown" class="countdown is-hidden"><span>3</span><small>READY</small></div>
+
+      <div class="speed-cluster">
+        <div class="speed-readout"><small>SPEED</small><b id="speedValue">0</b><span>km/h</span></div>
+        <div class="speed-bar"><i id="speedFill"></i></div>
+      </div>
+
+      <div class="token-counter">
+        <span class="token-star">✦</span>
+        <div><small>虹光星屑</small><b><em id="tokenCount">0</em> / <span id="tokenTotal">14</span></b></div>
+      </div>
+
+      <div id="ridePrompt" class="ride-prompt">
+        <span class="key">W</span><span class="key">↑</span>
+        <p>按住加速 · <b>A D</b> 微调方向</p>
+        <i></i>
+        <p id="ridePromptNote">松开也不会停下</p>
+      </div>
+
+      <div class="ride-progress">
+        <span id="progressLabel">正在登顶</span>
+        <div class="progress-track"><i id="progressFill"></i><em id="progressDot"></em></div>
+        <small id="progressPct">0%</small>
+      </div>
+
+      <div class="ride-footnote">拖动画面可环顾 · <b>ESC</b> 随时离开</div>
+    </section>
+
+    <!-- 结果 -->
+    <section id="result" class="result is-hidden" aria-label="滑行成绩">
+      <div class="result-card">
+        <div class="result-rays" aria-hidden="true"></div>
+        <div class="result-kicker"><span></span> YOU RODE THE RAINBOW</div>
+        <div class="result-medal" id="resultMedal">
+          <svg viewBox="0 0 120 120"><circle cx="60" cy="60" r="52" fill="none" stroke="currentColor" stroke-width=".7"/><circle cx="60" cy="60" r="46" fill="none" stroke="currentColor" stroke-width=".4" stroke-dasharray="2 4"/><path d="M22 76a38 38 0 0 1 76 0" fill="none" stroke="currentColor" stroke-width="4"/><path d="M60 28l3.8 11.3L75 43l-11.2 3.7L60 58l-3.8-11.3L45 43l11.2-3.7Z" fill="currentColor"/></svg>
+        </div>
+        <h2 id="resultTitle">滑入彩虹</h2>
+        <p id="resultSub">鎏金 · 03 道 · 你让整座滑道都亮了起来</p>
+        <div class="result-stats">
+          <div><small>滑行用时</small><b id="resultTime">—</b></div>
+          <i></i>
+          <div><small>最高时速</small><b id="resultSpeed">—</b></div>
+          <i></i>
+          <div><small>虹光星屑</small><b id="resultTokens">—</b></div>
+        </div>
+        <div id="resultBadge" class="result-badge">本场称号 · 追光的人</div>
+        <div class="result-actions">
+          <button id="againBtn" class="btn btn-primary"><span class="btn-copy"><small>ONE MORE RIDE</small><strong>再滑一次</strong></span><svg viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 2.6-5.9"/><path d="M4 4v5h5"/></svg></button>
+          <button id="changeBtn" class="btn btn-text">换一条颜色</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 帮助 -->
+    <section id="help" class="help-overlay is-hidden" aria-hidden="true">
+      <div class="help-card">
+        <button id="closeHelp" class="close-btn" aria-label="关闭">
+          <svg viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></svg>
+        </button>
+        <span class="eyebrow"><span></span> BEFORE YOU SLIDE</span>
+        <h2>三件事，然后出发</h2>
+        <div class="help-grid">
+          <div><span class="help-num">01</span><h4>选一条颜色</h4><p>点击滑道、左右箭头或色点。六条滑道的坡度一样，沿途的星屑不一样。</p></div>
+          <div><span class="help-num">02</span><h4>登上塔顶</h4><p>相机会带你走过右侧鎏金阶梯。拖动画面可以随时环顾整座园区。</p></div>
+          <div><span class="help-num">03</span><h4>按住，飞下去</h4><p>按住 <b>W</b> / <b>↑</b> / 鼠标左键加速；<b>A D</b> 或左右方向键微调，去吃虹光星屑。</p></div>
+        </div>
+        <div class="help-tip"><b>小提示</b> 星屑吃得越多，终点星尘礼花越盛大。别怕快——滑道底部有三十米长的柔软减速毯。</div>
+        <button id="helpGo" class="btn btn-primary"><span class="btn-copy"><small>ALL SET</small><strong>知道了，去滑彩虹</strong></span><svg viewBox="0 0 24 24"><path d="M5 12h13M13 6l6 6-6 6"/></svg></button>
+      </div>
+    </section>
+
+    <div id="toast" class="toast"></div>
+    <div id="fallback" class="fallback is-hidden">你的浏览器暂时无法开启 3D 虹光。请换用支持 WebGL 的浏览器再来。</div>
+
+    <div class="corner-credit"><span>✦</span> ASTRALIA PARK · THE RAINBOW CHUTE</div>
+  </div>
+
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "../vendor/three/three.module.js",
+        "three/addons/": "../vendor/three/addons/"
+      }
+    }
+  </script>
+  <script type="module" src="./main.js"></script>
+</body>
+</html>

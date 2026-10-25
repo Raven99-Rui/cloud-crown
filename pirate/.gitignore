@@ -1,0 +1,4 @@
+# local visual-QA browser profiles and throwaway captures
+.chrome-qa*/
+preview/_*
+*.log

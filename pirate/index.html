@@ -1,0 +1,289 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#07242c" />
+  <meta name="description" content="黑帆湾 · 海盗船 — 一座可以环视、登船、亲自荡起的 3D 复古纸艺机动游戏。" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230b3340'/%3E%3Cpath d='M32 10c-10 0-16 6-16 15 0 5 2 8 5 10v6h4l1 6h12l1-6h4v-6c3-2 5-5 5-10 0-9-6-15-16-15Z' fill='%23f2dfb9'/%3E%3Ccircle cx='25' cy='29' r='3.3' fill='%230b3340'/%3E%3Ccircle cx='39' cy='29' r='3.3' fill='%230b3340'/%3E%3Cpath d='M29 38h6l-1 4h-4z' fill='%23d3a052'/%3E%3Cpath d='M14 52h36' stroke='%23d3a052' stroke-width='2.5'/%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="./src/style.css?v=20261025-5" />
+  <title>黑帆湾 · 海盗船 | BLACKSAIL BAY</title>
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "../vendor/three/three.module.js",
+        "three/addons/": "../vendor/three/addons/"
+      }
+    }
+  </script>
+</head>
+<body>
+  <div id="app">
+    <canvas id="stage" aria-label="可交互的 3D 海盗船机动游戏"></canvas>
+    <div class="screen-grade" aria-hidden="true">
+      <div class="grade-vignette"></div>
+      <div class="grade-warm"></div>
+      <div class="grade-grain"></div>
+    </div>
+
+    <!-- ================= 载入 ================= -->
+    <section id="loading" class="loading" aria-label="正在载入黑帆湾">
+      <div class="loading-frame" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+      <div class="loading-inner">
+        <div class="loading-crest">
+          <svg viewBox="0 0 72 72" aria-hidden="true">
+            <circle cx="36" cy="36" r="33" fill="none" stroke="currentColor" stroke-width=".7" opacity=".55"/>
+            <circle cx="36" cy="36" r="28.5" fill="none" stroke="currentColor" stroke-width=".45" stroke-dasharray="1.5 4"/>
+            <path d="M36 15c-8.2 0-13.2 5-13.2 12.2 0 4.1 1.7 6.7 4.2 8.2v4.9h3.2l.8 5.2h10l.8-5.2H45v-4.9c2.5-1.5 4.2-4.1 4.2-8.2C49.2 20 44.2 15 36 15Z" fill="none" stroke="currentColor" stroke-width="1.4"/>
+            <circle cx="30.4" cy="30.2" r="3" fill="currentColor" opacity=".9"/>
+            <circle cx="41.6" cy="30.2" r="3" fill="currentColor" opacity=".9"/>
+            <path d="M33.8 37.2h4.4l-.6 3.3h-3.2z" fill="currentColor"/>
+            <path d="M18 58.5c5.8-3.6 12.2-5.4 18-5.4s12.2 1.8 18 5.4" fill="none" stroke="currentColor" stroke-width="1.3"/>
+            <path d="m24 62 3.8-1.2L31 64m-3-4 4 1.8" fill="none" stroke="currentColor" stroke-width=".9" opacity=".65"/>
+          </svg>
+        </div>
+        <p class="loading-kicker">BLACKSAIL BAY · ATTRACTION NO. 004</p>
+        <h1 class="loading-title">海盗船</h1>
+        <p class="loading-sub">THE BLACK SAIL</p>
+        <div class="loading-track"><i id="loadFill"></i></div>
+        <p class="loading-note" id="loadNote">正在升起黑帆，系紧缆绳……</p>
+      </div>
+      <div class="loading-foot"><span>黑帆湾 19:42</span><span>潮位 2.4 m</span><span>东北风 3 级</span></div>
+    </section>
+
+    <!-- ================= 顶部 ================= -->
+    <header id="topbar" class="topbar preload">
+      <div class="brand">
+        <span class="brand-crest" aria-hidden="true">
+          <svg viewBox="0 0 48 48">
+            <path d="M24 7c-8.7 0-14 5.4-14 13 0 4.4 1.8 7.2 4.5 8.8V35h3.4l.9 4.4h10.4l.9-4.4h3.4v-6.2c2.7-1.6 4.5-4.4 4.5-8.8C38 12.4 32.7 7 24 7Z" fill="none" stroke="currentColor" stroke-width="1.4"/>
+            <circle cx="18.3" cy="22.5" r="3.1" fill="currentColor"/>
+            <circle cx="29.7" cy="22.5" r="3.1" fill="currentColor"/>
+            <path d="M22 30h4l-.5 3h-3z" fill="currentColor"/>
+            <path d="M8 41.5h32" stroke="currentColor" stroke-width="1"/>
+            <path d="m11 44 4-1.5 3 2m16-2 4-1.5 3 2" fill="none" stroke="currentColor" stroke-width=".8" opacity=".5"/>
+          </svg>
+        </span>
+        <span class="brand-copy">
+          <strong>黑帆湾</strong>
+          <small>BLACKSAIL BAY · EST. 1908</small>
+        </span>
+        <span class="brand-rule"></span>
+        <span class="brand-ride"><i>RIDE</i><b>004</b></span>
+      </div>
+
+      <div class="top-status">
+        <span class="live-pip"><i></i>夜航开放中</span>
+        <span class="status-divider"></span>
+        <span id="clockText">19:42</span>
+        <span class="status-divider"></span>
+        <span id="weatherText">东北风 · 微浪</span>
+      </div>
+
+      <nav class="tools" aria-label="场景工具">
+        <button id="soundBtn" class="icon-btn" type="button" aria-label="打开声音" data-tip="声音">
+          <svg class="ico-sound" viewBox="0 0 24 24"><path d="M11 5 6.5 9H3v6h3.5L11 19V5Z"/><path d="M15 8.5c1.4 1.1 1.4 5.9 0 7M18 5.5c3 2.1 3 10.9 0 13"/></svg>
+          <svg class="ico-mute" viewBox="0 0 24 24"><path d="M11 5 6.5 9H3v6h3.5L11 19V5Z"/><path d="m16 9 5 6m0-6-5 6"/></svg>
+        </button>
+        <button id="moodBtn" class="icon-btn" type="button" aria-label="切换日夜" data-tip="暮色 / 夜航">
+          <svg class="ico-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M19.1 4.9l-1.4 1.4M6.3 17.7l-1.4 1.4"/></svg>
+          <svg class="ico-moon" viewBox="0 0 24 24"><path d="M20.3 15.2A8.5 8.5 0 0 1 8.8 3.7 8.5 8.5 0 1 0 20.3 15.2Z"/></svg>
+        </button>
+        <button id="helpBtn" class="icon-btn" type="button" aria-label="游玩指南" data-tip="游玩指南">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.7 9a2.4 2.4 0 1 1 3.3 2.2c-.8.4-1 1-1 1.8M12 17h.01"/></svg>
+        </button>
+        <button id="fullBtn" class="icon-btn" type="button" aria-label="全屏" data-tip="全屏">
+          <svg viewBox="0 0 24 24"><path d="M8 3H3v5M16 3h5v5M21 16v5h-5M3 16v5h5"/></svg>
+        </button>
+      </nav>
+    </header>
+
+    <!-- ================= 标题 ================= -->
+    <section id="hero" class="hero preload" aria-labelledby="rideTitle">
+      <div class="hero-wash" aria-hidden="true"></div>
+      <p class="eyebrow"><span></span>RIDE 004 · 复古纸艺机动游戏</p>
+      <h1 id="rideTitle">
+        <span class="title-cn">海盗船</span>
+        <span class="title-en">THE BLACK SAIL</span>
+      </h1>
+      <p class="hero-lede">潮水漫过黑帆湾的旧码头。登上这艘鎏金骨雕的海盗船，<br class="desktop-only" />让它在暮色里越荡越高，直到整片海都倾斜过来。</p>
+      <div class="hero-specs">
+        <div><small>最大摆幅</small><strong>78<i>°</i></strong></div>
+        <div><small>离地高度</small><strong>10.5<i>m</i></strong></div>
+        <div><small>额定载客</small><strong>32<i>人</i></strong></div>
+      </div>
+      <div class="hero-sig">— 黑帆湾码头 · 潮汐班次 —</div>
+    </section>
+
+    <!-- ================= 场景内热点 ================= -->
+    <div id="hotspots" class="hotspots" aria-label="场景细节"></div>
+
+    <!-- ================= 视角栏 ================= -->
+    <aside id="viewRail" class="view-rail preload" aria-label="探索视角">
+      <div class="rail-head"><span>EXPLORE</span><b>探索视角</b></div>
+      <div class="rail-list">
+        <button type="button" class="view-btn is-active" data-view="overview" data-focus="overview">
+          <span class="view-num">01</span>
+          <span class="view-copy"><b>黑帆湾</b><small>OVERVIEW</small></span>
+          <svg viewBox="0 0 24 24"><path d="M4 19h16M6 19V9l6-4 6 4v10M10 19v-5h4v5"/></svg>
+        </button>
+        <button type="button" class="view-btn" data-view="figurehead" data-focus="figurehead">
+          <span class="view-num">02</span>
+          <span class="view-copy"><b>船首骨雕</b><small>FIGUREHEAD</small></span>
+          <svg viewBox="0 0 24 24"><path d="M12 3c-4.5 0-7 2.7-7 6.5 0 2.2.9 3.6 2.3 4.4V17h2l.4 3h4.6l.4-3h2v-3.1c1.4-.8 2.3-2.2 2.3-4.4C19 5.7 16.5 3 12 3Z"/><circle cx="9.5" cy="10" r="1.3"/><circle cx="14.5" cy="10" r="1.3"/></svg>
+        </button>
+        <button type="button" class="view-btn" data-view="wheel" data-focus="wheel">
+          <span class="view-num">03</span>
+          <span class="view-copy"><b>航海舵轮</b><small>SHIP'S WHEEL</small></span>
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="1.6"/><path d="M12 6V2m0 20v-4M6 12H2m20 0h-4M7.8 7.8 5 5m14 14-2.8-2.8m0-9.4L19 5M5 19l2.8-2.8"/></svg>
+        </button>
+        <button type="button" class="view-btn" data-view="flag" data-focus="flag">
+          <span class="view-num">04</span>
+          <span class="view-copy"><b>海盗旗</b><small>JOLLY ROGER</small></span>
+          <svg viewBox="0 0 24 24"><path d="M5 21V3h9l-1.4 3.3L15 9H8"/><path d="M10 7.5c-2 0-3.2 1.2-3.2 3 0 1 .4 1.7 1 2.1v1.2h.9l.2 1.1h2.2l.2-1.1h.9v-1.2c.6-.4 1-1.1 1-2.1 0-1.8-1.2-3-3.2-3Z" fill="currentColor" stroke="none"/></svg>
+        </button>
+        <button type="button" class="view-btn" data-view="gate" data-focus="gate">
+          <span class="view-num">05</span>
+          <span class="view-copy"><b>入口牌坊</b><small>THE GATE</small></span>
+          <svg viewBox="0 0 24 24"><path d="M3 21V8h18v13M7 21V10m10 11V10M3 8l9-4 9 4M7 15h10"/></svg>
+        </button>
+      </div>
+      <div class="rail-foot"><span></span>点击细节，靠近观看</div>
+    </aside>
+
+    <!-- ================= 细节注释 ================= -->
+    <aside id="focusNote" class="focus-note" aria-live="polite">
+      <button id="focusClose" type="button" aria-label="关闭细节注释">
+        <svg viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></svg>
+      </button>
+      <p class="focus-kicker" id="focusKicker">DETAIL 02 / FIGUREHEAD</p>
+      <h2 id="focusTitle">鎏金骷髅船首</h2>
+      <p id="focusCopy">船首的鎏金骷髅迎着潮风。它不只是装饰——老水手说，它会替整船人记住回航的方向。</p>
+      <span class="focus-meta" id="focusMeta">复刻自 1908 年黑帆号首航船首像</span>
+    </aside>
+
+    <!-- ================= 登船控制台 ================= -->
+    <section id="console" class="console preload" aria-label="登船控制台">
+      <div class="console-inner">
+        <div class="boarding-status">
+          <span class="status-mark"><i></i></span>
+          <div>
+            <small>NOW BOARDING · 第 7 班</small>
+            <strong>黑帆号 · 即刻登船</strong>
+          </div>
+          <span class="queue-badge">候船 4 分钟</span>
+        </div>
+
+        <div class="amp-control">
+          <div class="amp-label"><span>摆幅</span><b id="ampValue">68°</b></div>
+          <input id="ampSlider" type="range" min="30" max="78" value="68" step="1" aria-label="选择海盗船摆幅" />
+          <div class="amp-scale"><span>轻摇</span><span>狂欢</span></div>
+        </div>
+
+        <div class="console-actions">
+          <button id="rideBtn" type="button" class="btn-board">
+            <span class="btn-board-copy"><small>STEP ABOARD</small><strong>登上黑帆号</strong></span>
+            <span class="btn-board-icon">
+              <svg viewBox="0 0 24 24"><path d="M4 12h15M13 6l6 6-6 6"/></svg>
+            </span>
+          </button>
+          <button id="tourBtn" type="button" class="btn-tour" aria-label="自动环游">
+            <svg viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 2.3-5.6"/><path d="M4 4v5h5"/><circle cx="12" cy="12" r="2"/></svg>
+            <span>自动<br/>环游</span>
+          </button>
+        </div>
+      </div>
+      <div class="console-foot">
+        <span><i class="mouse-glyph"></i>拖动环视</span>
+        <span><i class="wheel-glyph"></i>滚轮近看</span>
+        <span><kbd>Space</kbd> 登船 / 荡高</span>
+        <span class="foot-note">无需排队 · 实时 3D 物理摆荡</span>
+      </div>
+    </section>
+
+    <!-- ================= 乘坐 HUD ================= -->
+    <section id="rideHud" class="ride-hud" aria-label="海盗船乘坐界面">
+      <div class="rush-vignette" aria-hidden="true"></div>
+      <div class="ride-top">
+        <div class="ride-badge"><i></i><span>黑帆号 · 航行中</span><b id="rideAmpLabel">68° 摆幅</b></div>
+        <button id="exitRide" type="button" class="exit-ride">
+          <span>结束航行</span>
+          <svg viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></svg>
+        </button>
+      </div>
+
+      <div class="ride-title">
+        <small>HOLD ON TIGHT</small>
+        <strong>让海风把船头抬起来。</strong>
+        <span id="rideHint">拖动画面，环绕黑帆号</span>
+      </div>
+
+      <div class="ride-gauge" aria-hidden="true">
+        <div class="gauge-ring"></div>
+        <div class="gauge-ticks"></div>
+        <div class="gauge-needle" id="gaugeNeedle"></div>
+        <div class="gauge-center">
+          <small>SWING</small>
+          <b id="rideAngle">0°</b>
+          <span id="rideSide">正中</span>
+        </div>
+      </div>
+
+      <div class="ride-panel">
+        <div class="ride-stat"><small>摆角</small><strong id="statAngle">0°</strong><span>DEGREE</span></div>
+        <div class="ride-stat"><small>离地</small><strong id="statHeight">4.2<em>m</em></strong><span>ALTITUDE</span></div>
+        <div class="ride-stat"><small>船速</small><strong id="statSpeed">0.0<em>m/s</em></strong><span>VELOCITY</span></div>
+        <div class="ride-stat"><small>G 值</small><strong id="statG">1.0<em>g</em></strong><span>G-FORCE</span></div>
+      </div>
+
+      <div class="ride-controls">
+        <button id="boostBtn" type="button" class="btn-boost">
+          <span class="boost-ring"></span>
+          <span class="boost-copy"><small>PUMP THE SWING</small><b>再荡高一点</b></span>
+          <svg viewBox="0 0 24 24"><path d="M12 19V5M6 11l6-6 6 6"/></svg>
+        </button>
+        <p class="look-hint"><i></i>拖动画面环顾 · <kbd>Space</kbd> 荡高</p>
+      </div>
+
+      <div class="ride-footer">
+        <span>BLACKSAIL BAY · 19:42</span>
+        <span class="ride-safety">请勿站立 · 抓紧扶手</span>
+        <span>潮位 2.4 m</span>
+      </div>
+    </section>
+
+    <!-- ================= 帮助 ================= -->
+    <div id="helpModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="helpTitle">
+      <div class="modal-backdrop" data-close-modal></div>
+      <div class="help-card">
+        <button class="modal-close" type="button" data-close-modal aria-label="关闭">
+          <svg viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></svg>
+        </button>
+        <p class="modal-kicker">A SMALL GUIDE TO THE BAY</p>
+        <h2 id="helpTitle">黑帆湾登船指南</h2>
+        <p class="modal-lede">这不是一段布置好的视频。整艘船、海面、灯与旗都在实时运行，你可以走近它，也可以坐上去。</p>
+        <div class="help-grid">
+          <div class="help-item"><span class="help-num">01</span><h3>环视与靠近</h3><p>按住画面拖动旋转视角，滚轮缩放。右侧「探索视角」可直接跳到船首、舵轮与入口。</p></div>
+          <div class="help-item"><span class="help-num">02</span><h3>登船与摆荡</h3><p>调好摆幅后点击「登上黑帆号」，镜头会贴近船身跟拍整段航行。航行中可以拖动画面环绕、滚轮拉近，按空格或「再荡高一点」继续加力。</p></div>
+          <div class="help-item"><span class="help-num">03</span><h3>暮色与夜航</h3><p>右上角切换暮色与夜航。入夜后甲板灯、码头灯与星空会亮起，海面颜色也会跟着变深。</p></div>
+          <div class="help-item"><span class="help-num">04</span><h3>快捷操作</h3><p><kbd>Space</kbd> 登船 / 荡高 &nbsp; <kbd>Esc</kbd> 结束 &nbsp; <kbd>M</kbd> 静音 &nbsp; <kbd>R</kbd> 全景 &nbsp; <kbd>F</kbd> 全屏</p></div>
+        </div>
+        <div class="help-foot"><span>建议开启声音，海浪、木桅与风都在实时合成。</span><button type="button" class="help-start" data-close-modal>回到甲板</button></div>
+      </div>
+    </div>
+
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+    <div id="fatalError" class="fatal-error" role="alert">
+      <strong>SCENE INTERRUPTED</strong>
+      <p>场景渲染遇到问题，请刷新页面。</p>
+      <pre id="fatalErrorText"></pre>
+    </div>
+    <pre id="debugState"></pre>
+
+    <div class="corner-mark" aria-hidden="true"><span>BLACKSAIL BAY</span><i></i><span>1908</span></div>
+  </div>
+
+  <script type="module" src="./src/main.js?v=20261025-5"></script>
+</body>
+</html>
